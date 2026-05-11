@@ -89,6 +89,9 @@ button{
 .hidden{
     display:none;
 }
+.viewer-container.active{
+    display:flex;
+}
 
 /* TITULOS */
 
@@ -140,7 +143,8 @@ button:hover{
 .viewer-container{
     position:fixed;
     inset:0;
-    background:black;
+    background:rgba(0,0,0,0.96);
+    display:none;
     z-index:100;
     display:flex;
     justify-content:center;
@@ -545,7 +549,7 @@ function openViewer(group,index){
 currentGroup = group;
 currentIndex = index;
 
-document.getElementById("viewerContainer").classList.remove("hidden");
+document.getElementById("viewerContainer").classList.add("active");
 
 loadImage();
 
@@ -673,7 +677,7 @@ loadImage();
 
 function closeViewer(){
 
-document.getElementById("viewerContainer").classList.add("hidden");
+document.getElementById("viewerContainer").classList.remove("active");
 
 if(openedFromSubmenu){
 
