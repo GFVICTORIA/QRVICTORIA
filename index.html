@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GF Victoria - Guest Experience</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:"Times New Roman", serif;
+    background-image:url("fondo qr3.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    min-height:100vh;
+    overflow:hidden;
+    color:white;
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    z-index:1;
+}
+
+.screen{
+    position:relative;
+    z-index:2;
+    width:100%;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:30px;
+}
+
+.hidden{
+    display:none;
+}
+
+h1{
+    font-size:46px;
+    font-style:italic;
+    margin-bottom:50px;
+    text-align:center;
+    text-shadow:0 3px 12px rgba(0,0,0,0.5);
+}
+
+.menu{
+    width:100%;
+    max-width:550px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+button{
+    padding:16px 20px;
+    border:none;
+    border-radius:16px;
+    background:rgba(0,0,0,0.65);
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+    transition:0.3s;
+    backdrop-filter:blur(5px);
+}
+
+button:hover{
+    background:rgba(0,0,0,0.85);
+    transform:scale(1.02);
+}
+
+.back-btn{
+    background:#a0002c;
+}
+
+.viewer-container{
+    position:relative;
+    width:100%;
+    height:100vh;
+    z-index:5;
+}
+
+.pdf-viewer{
+    width:100%;
+    height:100vh;
+    border:none;
+}
+
+.top-bar{
+    position:absolute;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    z-index:10;
+    width:95%;
+}
+
+.top-btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:30px;
+    background:rgba(0,0,0,0.7);
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    backdrop-filter:blur(4px);
+}
+
+.top-btn.active{
+    background:#a0002c;
+}
+
+.close-btn{
+    position:absolute;
+    top:20px;
+    right:20px;
+    z-index:15;
+    background:#a0002c;
+    border:none;
+    color:white;
+    padding:12px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.logo{
+    position:absolute;
+    bottom:25px;
+    font-size:18px;
+    letter-spacing:2px;
+}
+
+@media(max-width:768px){
+
+h1{
+    font-size:32px;
+}
+
+button{
+    font-size:18px;
+    padding:14px;
+}
+
+.top-btn{
+    font-size:13px;
+    padding:8px 14px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<!-- PANTALLA IDIOMAS -->
+
+<div class="screen" id="languageScreen">
+
+<h1>Select Language / Selecciona idioma</h1>
+
+<div class="menu">
+
+<button onclick="showMainMenu('es')">ESPAÑOL</button>
+<button onclick="showMainMenu('en')">ENGLISH</button>
+
+</div>
+
+<div class="logo">GF VICTORIA</div>
+
+</div>
+
+<!-- MENU PRINCIPAL -->
+
+<div class="screen hidden" id="mainMenuScreen">
+
+<h1 id="mainTitle"></h1>
+
+<div class="menu" id="mainMenu"></div>
+
+</div>
+
+<!-- SUBMENU -->
+
+<div class="screen hidden" id="subMenuScreen">
+
+<h1 id="subTitle"></h1>
+
+<div class="menu" id="subMenu"></div>
+
+</div>
+
+<!-- VISOR PDF -->
+
+<div class="viewer-container hidden" id="viewerContainer">
+
+<div class="top-bar" id="pdfNav"></div>
+
+<button class="close-btn" onclick="closeViewer()">✕</button>
+
+<iframe class="pdf-viewer" id="pdfViewer"></iframe>
+
+</div>
+
+<script>
+
+let currentLang = "es";
+let currentPdfGroup = [];
+let currentPdfIndex = 0;
+
+const content = {
+
+es: {
+
+mainTitle:"Seleccione una opción",
+
+main:[
+    {name:"Excursiones", action:"excursiones"},
+    {name:"Traslados", pdf:"traslados.pdf"},
+    {name:"Complementos de estancia", action:"extras"},
+    {name:"Rent a car", pdf:"rentacar.pdf"}
+],
+
+excursiones:[
+    {name:"Lo más vendido del mes", pdf:"mas-vendido.pdf"},
+    {name:"Información general", pdf:"general.pdf"},
+    {name:"Barcos", pdf:"barcos.pdf"},
+    {name:"Actividades en el agua", pdf:"agua.pdf"},
+    {name:"Actividades terrestres", pdf:"terrestres.pdf"},
+    {name:"Fondos Marinos", pdf:"fondos.pdf"},
+    {name:"Cielos", pdf:"cielos.pdf"},
+    {name:"Para toda la familia", pdf:"familia.pdf"},
+    {name:"Espectáculos", pdf:"shows.pdf"}
+],
+
+extras:[
+    {name:"Paquete de Cumpleaños", pdf:"cumple.pdf"},
+    {name:"Paquete Romántico", pdf:"romantico.pdf"},
+    {name:"Accesorios de bebé", pdf:"bebe.pdf"}
+]
+
+},
+
+en: {
+
+mainTitle:"Select an option",
+
+main:[
+    {name:"Excursions", action:"excursiones"},
+    {name:"Transfers", pdf:"transfers.pdf"},
+    {name:"Stay Complements", action:"extras"},
+    {name:"Rent a car", pdf:"rentacar-en.pdf"}
+],
+
+excursiones:[
+    {name:"Best Sellers", pdf:"best.pdf"},
+    {name:"General Information", pdf:"general-en.pdf"},
+    {name:"Boats", pdf:"boats.pdf"},
+    {name:"Water Activities", pdf:"water.pdf"},
+    {name:"Land Activities", pdf:"land.pdf"},
+    {name:"Sea Life", pdf:"sea.pdf"},
+    {name:"Sky", pdf:"sky.pdf"},
+    {name:"For the whole family", pdf:"family.pdf"},
+    {name:"Shows", pdf:"shows-en.pdf"}
+],
+
+extras:[
+    {name:"Birthday Package", pdf:"birthday.pdf"},
+    {name:"Romantic Package", pdf:"romantic.pdf"},
+    {name:"Baby Accessories", pdf:"baby.pdf"}
+]
+
+}
+
+};
+
+function showMainMenu(lang){
+
+currentLang = lang;
+
+document.getElementById("languageScreen").classList.add("hidden");
+document.getElementById("mainMenuScreen").classList.remove("hidden");
+
+document.getElementById("mainTitle").innerText =
+content[lang].mainTitle;
+
+const menu = document.getElementById("mainMenu");
+
+menu.innerHTML = "";
+
+content[lang].main.forEach(item=>{
+
+const btn = document.createElement("button");
+
+btn.innerText = item.name;
+
+if(item.pdf){
+
+btn.onclick = ()=>{
+
+openPdfViewer([{name:item.name,pdf:item.pdf}],0);
+
+};
+
+}else{
+
+btn.onclick = ()=>showSubMenu(item.action);
+
+}
+
+menu.appendChild(btn);
+
+});
+
+const back = document.createElement("button");
+
+back.className="back-btn";
+
+back.innerText = lang==="es" ? "← Volver" : "← Back";
+
+back.onclick = ()=>{
+
+document.getElementById("mainMenuScreen").classList.add("hidden");
+document.getElementById("languageScreen").classList.remove("hidden");
+
+};
+
+menu.appendChild(back);
+
+}
+
+function showSubMenu(type){
+
+document.getElementById("mainMenuScreen").classList.add("hidden");
+document.getElementById("subMenuScreen").classList.remove("hidden");
+
+document.getElementById("subTitle").innerText =
+type==="excursiones"
+? (currentLang==="es" ? "Excursiones" : "Excursions")
+: (currentLang==="es" ? "Complementos" : "Complements");
+
+const sub = document.getElementById("subMenu");
+
+sub.innerHTML = "";
+
+content[currentLang][type].forEach((item,index)=>{
+
+const btn = document.createElement("button");
+
+btn.innerText = item.name;
+
+btn.onclick = ()=>{
+
+openPdfViewer(content[currentLang][type],index);
+
+};
+
+sub.appendChild(btn);
+
+});
+
+const back = document.createElement("button");
+
+back.className="back-btn";
+
+back.innerText = currentLang==="es" ? "← Volver" : "← Back";
+
+back.onclick = ()=>{
+
+document.getElementById("subMenuScreen").classList.add("hidden");
+document.getElementById("mainMenuScreen").classList.remove("hidden");
+
+};
+
+sub.appendChild(back);
+
+}
+
+function openPdfViewer(group,index){
+
+currentPdfGroup = group;
+currentPdfIndex = index;
+
+document.getElementById("subMenuScreen").classList.add("hidden");
+document.getElementById("mainMenuScreen").classList.add("hidden");
+
+document.getElementById("viewerContainer").classList.remove("hidden");
+
+loadPdf();
+
+}
+
+function loadPdf(){
+
+const viewer = document.getElementById("pdfViewer");
+
+viewer.src = currentPdfGroup[currentPdfIndex].pdf;
+
+const nav = document.getElementById("pdfNav");
+
+nav.innerHTML = "";
+
+currentPdfGroup.forEach((item,index)=>{
+
+const btn = document.createElement("button");
+
+btn.className = "top-btn";
+
+if(index===currentPdfIndex){
+btn.classList.add("active");
+}
+
+btn.innerText = item.name;
+
+btn.onclick = ()=>{
+
+currentPdfIndex = index;
+loadPdf();
+
+};
+
+nav.appendChild(btn);
+
+});
+
+}
+
+function closeViewer(){
+
+document.getElementById("viewerContainer").classList.add("hidden");
+
+document.getElementById("subMenuScreen").classList.remove("hidden");
+
+}
+
+/* SWIPE MOVIL */
+
+let startX = 0;
+
+document.addEventListener("touchstart",e=>{
+startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend",e=>{
+
+let endX = e.changedTouches[0].clientX;
+
+if(Math.abs(startX-endX)>70){
+
+if(endX < startX){
+
+if(currentPdfIndex < currentPdfGroup.length-1){
+
+currentPdfIndex++;
+loadPdf();
+
+}
+
+}else{
+
+if(currentPdfIndex > 0){
+
+currentPdfIndex--;
+loadPdf();
+
+}
+
+}
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
