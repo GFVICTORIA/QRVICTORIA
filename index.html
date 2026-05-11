@@ -22,9 +22,46 @@ body{
     background-position:center;
     background-repeat:no-repeat;
     min-height:100vh;
+    height:100dvh;
     overflow:hidden;
     color:white;
 }
+
+/* FONDO MOVIL */
+
+@media(max-width:768px){
+
+body{
+    background-image:url("fondo-mobile.jpg");
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center top;
+    background-color:black;
+}
+
+h1{
+    font-size:32px;
+}
+
+button{
+    font-size:18px;
+    padding:14px;
+}
+
+.top-btn{
+    font-size:12px;
+    padding:8px 12px;
+}
+
+.arrow{
+    width:45px;
+    height:45px;
+    font-size:28px;
+}
+
+}
+
+/* OVERLAY */
 
 .overlay{
     position:fixed;
@@ -33,6 +70,8 @@ body{
     z-index:1;
 }
 
+/* PANTALLAS */
+
 .screen{
     position:relative;
     z-index:2;
@@ -40,14 +79,18 @@ body{
     height:100vh;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
     padding:30px;
+    padding-top:120px;
+    overflow-y:auto;
 }
 
 .hidden{
     display:none;
 }
+
+/* TITULOS */
 
 h1{
     font-size:46px;
@@ -57,13 +100,17 @@ h1{
     text-shadow:0 3px 12px rgba(0,0,0,0.5);
 }
 
+/* MENUS */
+
 .menu{
     width:100%;
-    max-width:550px;
+    max-width:560px;
     display:flex;
     flex-direction:column;
     gap:18px;
 }
+
+/* BOTONES */
 
 button{
     padding:16px 20px;
@@ -82,44 +129,56 @@ button:hover{
     transform:scale(1.02);
 }
 
+/* BOTON VOLVER */
+
 .back-btn{
     background:#a0002c;
 }
 
+/* VISOR */
+
 .viewer-container{
-    position:relative;
-    width:100%;
-    height:100vh;
-    z-index:5;
+    position:fixed;
+    inset:0;
+    background:black;
+    z-index:100;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
 }
 
-.pdf-viewer{
+.viewer-image{
     width:100%;
-    height:100vh;
-    border:none;
+    height:100%;
+    object-fit:contain;
 }
+
+/* MENU SUPERIOR */
 
 .top-bar{
     position:absolute;
-    top:20px;
+    top:15px;
     left:50%;
     transform:translateX(-50%);
     display:flex;
-    gap:12px;
+    gap:10px;
     flex-wrap:wrap;
     justify-content:center;
     z-index:10;
     width:95%;
 }
 
+/* BOTONES SUPERIORES */
+
 .top-btn{
-    padding:10px 18px;
+    padding:10px 16px;
     border:none;
     border-radius:30px;
-    background:rgba(0,0,0,0.7);
+    background:rgba(0,0,0,0.72);
     color:white;
     cursor:pointer;
-    font-size:16px;
+    font-size:15px;
     backdrop-filter:blur(4px);
 }
 
@@ -127,11 +186,13 @@ button:hover{
     background:#a0002c;
 }
 
+/* BOTON CERRAR */
+
 .close-btn{
     position:absolute;
     top:20px;
     right:20px;
-    z-index:15;
+    z-index:20;
     background:#a0002c;
     border:none;
     color:white;
@@ -141,29 +202,32 @@ button:hover{
     font-size:16px;
 }
 
-.logo{
+/* FLECHAS */
+
+.arrow{
     position:absolute;
-    bottom:25px;
-    font-size:18px;
-    letter-spacing:2px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:15;
+    font-size:42px;
+    color:white;
+    background:rgba(0,0,0,0.5);
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    user-select:none;
 }
 
-@media(max-width:768px){
-
-h1{
-    font-size:32px;
+.arrow-left{
+    left:20px;
 }
 
-button{
-    font-size:18px;
-    padding:14px;
-}
-
-.top-btn{
-    font-size:13px;
-    padding:8px 14px;
-}
-
+.arrow-right{
+    right:20px;
 }
 
 </style>
@@ -173,7 +237,7 @@ button{
 
 <div class="overlay"></div>
 
-<!-- PANTALLA IDIOMAS -->
+<!-- IDIOMAS -->
 
 <div class="screen" id="languageScreen">
 
@@ -185,8 +249,6 @@ button{
 <button onclick="showMainMenu('en')">ENGLISH</button>
 
 </div>
-
-<div class="logo">GF VICTORIA</div>
 
 </div>
 
@@ -210,23 +272,35 @@ button{
 
 </div>
 
-<!-- VISOR PDF -->
+<!-- VISOR -->
 
 <div class="viewer-container hidden" id="viewerContainer">
 
-<div class="top-bar" id="pdfNav"></div>
+<div class="top-bar" id="imageNav"></div>
 
 <button class="close-btn" onclick="closeViewer()">✕</button>
 
-<iframe class="pdf-viewer" id="pdfViewer"></iframe>
+<div class="arrow arrow-left" onclick="prevImage()">‹</div>
+
+<img class="viewer-image" id="viewerImage">
+
+<div class="arrow arrow-right" onclick="nextImage()">›</div>
 
 </div>
 
 <script>
 
+/* VARIABLES */
+
 let currentLang = "es";
-let currentPdfGroup = [];
-let currentPdfIndex = 0;
+let currentGroup = [];
+let currentIndex = 0;
+let openedFromSubmenu = false;
+
+let currentMultiImages = null;
+let currentMultiIndex = 0;
+
+/* CONTENIDO */
 
 const content = {
 
@@ -235,28 +309,52 @@ es: {
 mainTitle:"Seleccione una opción",
 
 main:[
-    {name:"Excursiones", action:"excursiones"},
-    {name:"Traslados", pdf:"traslados.pdf"},
-    {name:"Complementos de estancia", action:"extras"},
-    {name:"Rent a car", pdf:"rentacar.pdf"}
+
+{name:"Excursiones", action:"excursiones"},
+{name:"Traslados", image:"traslado.jpg"},
+{name:"Complementos de estancia", action:"extras"},
+{name:"Rent a car", image:"alquiler.jpg"}
+
 ],
 
 excursiones:[
-    {name:"Lo más vendido del mes", pdf:"mas-vendido.pdf"},
-    {name:"Información general", pdf:"general.pdf"},
-    {name:"Barcos", pdf:"barcos.pdf"},
-    {name:"Actividades en el agua", pdf:"agua.pdf"},
-    {name:"Actividades terrestres", pdf:"terrestres.pdf"},
-    {name:"Fondos Marinos", pdf:"fondos.pdf"},
-    {name:"Cielos", pdf:"cielos.pdf"},
-    {name:"Para toda la familia", pdf:"familia.pdf"},
-    {name:"Espectáculos", pdf:"shows.pdf"}
+
+{name:"Lo más vendido del mes", image:"mas-vendido.jpg"},
+{name:"Información general", image:"general esp.jpg"},
+{name:"Barcos", image:"barco.jpg"},
+{name:"Actividades en el agua", image:"agua.jpg"},
+{name:"Actividades terrestres", image:"terrestre.jpg"},
+{name:"Fondos Marinos", image:"marinos.jpg"},
+{name:"Cielos", image:"cielos.jpg"},
+{name:"Para toda la familia", image:"familia.jpg"},
+{name:"Espectáculos", image:"espectaculos.jpg"}
+
 ],
 
 extras:[
-    {name:"Paquete de Cumpleaños", pdf:"cumple.pdf"},
-    {name:"Paquete Romántico", pdf:"romantico.pdf"},
-    {name:"Accesorios de bebé", pdf:"bebe.pdf"}
+
+{
+name:"Paquete de Cumpleaños",
+images:[
+"cumpleaños_page-0001.jpg",
+"cumpleaños_page-0002.jpg"
+"cumpleaños_page-0003.jpg"
+]
+},
+
+{
+name:"Paquete Romántico",
+images:[
+"romantico_page-0001.jpg",
+"romantico_page-0002.jpg",
+"romantico_page-0003.jpg"
+"romantico_page-0004.jpg"
+"romantico_page-0005.jpg"
+]
+},
+
+{name:"Accesorios de bebé", image:"bebe.jpg"}
+
 ]
 
 },
@@ -266,39 +364,66 @@ en: {
 mainTitle:"Select an option",
 
 main:[
-    {name:"Excursions", action:"excursiones"},
-    {name:"Transfers", pdf:"transfers.pdf"},
-    {name:"Stay Complements", action:"extras"},
-    {name:"Rent a car", pdf:"rentacar-en.pdf"}
+
+{name:"Excursions", action:"excursiones"},
+{name:"Transfers", image:"TRANSFER ING.jpg"},
+{name:"Stay Complements", action:"extras"},
+{name:"Rent a car", image:"RENT.jpg"}
+
 ],
 
 excursiones:[
-    {name:"Best Sellers", pdf:"best.pdf"},
-    {name:"General Information", pdf:"general-en.pdf"},
-    {name:"Boats", pdf:"boats.pdf"},
-    {name:"Water Activities", pdf:"water.pdf"},
-    {name:"Land Activities", pdf:"land.pdf"},
-    {name:"Sea Life", pdf:"sea.pdf"},
-    {name:"Sky", pdf:"sky.pdf"},
-    {name:"For the whole family", pdf:"family.pdf"},
-    {name:"Shows", pdf:"shows-en.pdf"}
+
+{name:"Best Sellers", image:"best.jpg"},
+{name:"General Information", image:"general ing.jpg"},
+{name:"Boats", image:"BOAT.jpg"},
+{name:"Water Activities", image:"WATER.jpg"},
+{name:"Land Activities", image:"LAND.jpg"},
+{name:"Marine Experiences", image:"MARINE.jpg"},
+{name:"Sky", image:"SKY.jpg"},
+{name:"For the whole family", image:"FAMILY.jpg"},
+{name:"Shows", image:"SHOW.jpg"}
+
 ],
 
 extras:[
-    {name:"Birthday Package", pdf:"birthday.pdf"},
-    {name:"Romantic Package", pdf:"romantic.pdf"},
-    {name:"Baby Accessories", pdf:"baby.pdf"}
+
+{
+name:"Birthday Package",
+images:[
+"BIRTHDAY_page-0001.jpg",
+"BIRTHDAY_page-0002.jpg"
+"BIRTHDAY_page-0003.jpg"
+]
+},
+
+{
+name:"Romantic Package",
+images:[
+"ROMANTIC_page-0001.jpg",
+"ROMANTIC_page-0002.jpg",
+"ROMANTIC_page-0003.jpg"
+"ROMANTIC_page-0004.jpg"
+"ROMANTIC_page-0005.jpg"
+]
+},
+
+{name:"Baby Accessories", image:"BABY.jpg"}
+
 ]
 
 }
 
 };
 
+/* MENU PRINCIPAL */
+
 function showMainMenu(lang){
 
 currentLang = lang;
 
 document.getElementById("languageScreen").classList.add("hidden");
+
 document.getElementById("mainMenuScreen").classList.remove("hidden");
 
 document.getElementById("mainTitle").innerText =
@@ -314,11 +439,16 @@ const btn = document.createElement("button");
 
 btn.innerText = item.name;
 
-if(item.pdf){
+if(item.image || item.images){
 
 btn.onclick = ()=>{
 
-openPdfViewer([{name:item.name,pdf:item.pdf}],0);
+openedFromSubmenu = false;
+
+openViewer(
+[{name:item.name,image:item.image,images:item.images}],
+0
+);
 
 };
 
@@ -334,13 +464,14 @@ menu.appendChild(btn);
 
 const back = document.createElement("button");
 
-back.className="back-btn";
+back.className = "back-btn";
 
 back.innerText = lang==="es" ? "← Volver" : "← Back";
 
 back.onclick = ()=>{
 
 document.getElementById("mainMenuScreen").classList.add("hidden");
+
 document.getElementById("languageScreen").classList.remove("hidden");
 
 };
@@ -349,9 +480,12 @@ menu.appendChild(back);
 
 }
 
+/* SUBMENU */
+
 function showSubMenu(type){
 
 document.getElementById("mainMenuScreen").classList.add("hidden");
+
 document.getElementById("subMenuScreen").classList.remove("hidden");
 
 document.getElementById("subTitle").innerText =
@@ -371,7 +505,12 @@ btn.innerText = item.name;
 
 btn.onclick = ()=>{
 
-openPdfViewer(content[currentLang][type],index);
+openedFromSubmenu = true;
+
+openViewer(
+content[currentLang][type],
+index
+);
 
 };
 
@@ -381,13 +520,16 @@ sub.appendChild(btn);
 
 const back = document.createElement("button");
 
-back.className="back-btn";
+back.className = "back-btn";
 
-back.innerText = currentLang==="es" ? "← Volver" : "← Back";
+back.innerText = currentLang==="es"
+? "← Volver"
+: "← Back";
 
 back.onclick = ()=>{
 
 document.getElementById("subMenuScreen").classList.add("hidden");
+
 document.getElementById("mainMenuScreen").classList.remove("hidden");
 
 };
@@ -396,46 +538,70 @@ sub.appendChild(back);
 
 }
 
-function openPdfViewer(group,index){
+/* ABRIR VISOR */
 
-currentPdfGroup = group;
-currentPdfIndex = index;
+function openViewer(group,index){
 
-document.getElementById("subMenuScreen").classList.add("hidden");
-document.getElementById("mainMenuScreen").classList.add("hidden");
+currentGroup = group;
+currentIndex = index;
 
 document.getElementById("viewerContainer").classList.remove("hidden");
 
-loadPdf();
+loadImage();
 
 }
 
-function loadPdf(){
+/* CARGAR IMAGEN */
 
-const viewer = document.getElementById("pdfViewer");
+function loadImage(){
 
-viewer.src = currentPdfGroup[currentPdfIndex].pdf;
+const currentItem = currentGroup[currentIndex];
 
-const nav = document.getElementById("pdfNav");
+const viewer = document.getElementById("viewerImage");
+
+/* VARIAS PAGINAS */
+
+if(currentItem.images){
+
+viewer.src = currentItem.images[0];
+
+currentMultiImages = currentItem.images;
+
+currentMultiIndex = 0;
+
+}else{
+
+viewer.src = currentItem.image;
+
+currentMultiImages = null;
+
+}
+
+/* MENU SUPERIOR */
+
+const nav = document.getElementById("imageNav");
 
 nav.innerHTML = "";
 
-currentPdfGroup.forEach((item,index)=>{
+currentGroup.forEach((item,index)=>{
 
 const btn = document.createElement("button");
 
 btn.className = "top-btn";
 
-if(index===currentPdfIndex){
+if(index===currentIndex){
+
 btn.classList.add("active");
+
 }
 
 btn.innerText = item.name;
 
 btn.onclick = ()=>{
 
-currentPdfIndex = index;
-loadPdf();
+currentIndex = index;
+
+loadImage();
 
 };
 
@@ -445,11 +611,79 @@ nav.appendChild(btn);
 
 }
 
+/* SIGUIENTE */
+
+function nextImage(){
+
+if(currentMultiImages){
+
+if(currentMultiIndex < currentMultiImages.length-1){
+
+currentMultiIndex++;
+
+document.getElementById("viewerImage").src =
+currentMultiImages[currentMultiIndex];
+
+return;
+
+}
+
+}
+
+if(currentIndex < currentGroup.length-1){
+
+currentIndex++;
+
+loadImage();
+
+}
+
+}
+
+/* ANTERIOR */
+
+function prevImage(){
+
+if(currentMultiImages){
+
+if(currentMultiIndex > 0){
+
+currentMultiIndex--;
+
+document.getElementById("viewerImage").src =
+currentMultiImages[currentMultiIndex];
+
+return;
+
+}
+
+}
+
+if(currentIndex > 0){
+
+currentIndex--;
+
+loadImage();
+
+}
+
+}
+
+/* CERRAR */
+
 function closeViewer(){
 
 document.getElementById("viewerContainer").classList.add("hidden");
 
+if(openedFromSubmenu){
+
 document.getElementById("subMenuScreen").classList.remove("hidden");
+
+}else{
+
+document.getElementById("mainMenuScreen").classList.remove("hidden");
+
+}
 
 }
 
@@ -458,7 +692,9 @@ document.getElementById("subMenuScreen").classList.remove("hidden");
 let startX = 0;
 
 document.addEventListener("touchstart",e=>{
+
 startX = e.touches[0].clientX;
+
 });
 
 document.addEventListener("touchend",e=>{
@@ -469,21 +705,11 @@ if(Math.abs(startX-endX)>70){
 
 if(endX < startX){
 
-if(currentPdfIndex < currentPdfGroup.length-1){
-
-currentPdfIndex++;
-loadPdf();
-
-}
+nextImage();
 
 }else{
 
-if(currentPdfIndex > 0){
-
-currentPdfIndex--;
-loadPdf();
-
-}
+prevImage();
 
 }
 
