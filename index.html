@@ -89,6 +89,9 @@ button{
 .hidden{
     display:none;
 }
+
+/* VISOR ACTIVO */
+
 .viewer-container.active{
     display:flex;
 }
@@ -146,7 +149,6 @@ button:hover{
     background:rgba(0,0,0,0.96);
     display:none;
     z-index:100;
-    display:flex;
     justify-content:center;
     align-items:center;
     overflow:hidden;
@@ -278,7 +280,7 @@ button:hover{
 
 <!-- VISOR -->
 
-<div class="viewer-container hidden" id="viewerContainer">
+<div class="viewer-container" id="viewerContainer">
 
 <div class="top-bar" id="imageNav"></div>
 
@@ -341,7 +343,7 @@ extras:[
 name:"Paquete de Cumpleaños",
 images:[
 "cumpleaños_page-0001.jpg",
-"cumpleaños_page-0002.jpg"
+"cumpleaños_page-0002.jpg",
 "cumpleaños_page-0003.jpg"
 ]
 },
@@ -351,8 +353,8 @@ name:"Paquete Romántico",
 images:[
 "romantico_page-0001.jpg",
 "romantico_page-0002.jpg",
-"romantico_page-0003.jpg"
-"romantico_page-0004.jpg"
+"romantico_page-0003.jpg",
+"romantico_page-0004.jpg",
 "romantico_page-0005.jpg"
 ]
 },
